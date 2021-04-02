@@ -39,15 +39,15 @@ worker.commands
   })
 
 /**
- * 
+ * Creates base weather display embed
  * @param {Embed} embed 
  * @param {import('./weather').WeatherData} response
  * @returns {Embed}
  */
-const weatherEmbed = (embed, response) => {
+const weatherEmbed = (embed, response, forecast = false) => {
   return embed
     .color(config.color)
-    .title(`Weather in ${response.name}`, `https://google.com/maps/@${response.lat},${response.long},13z`)
+    .title(`${forecast ? 'Forecast' : 'Weather'} in ${response.name}`, `https://google.com/maps/@${response.lat},${response.long},13z`)
     .footer('Need help? Do @Weather help')
     .timestamp()
 }
@@ -62,6 +62,7 @@ worker.commands.CommandContext = class extends CommandContext {
 
     return this.db
   }
+
   async getDegree () {
     if (this.flags.degree) return this.flags.degree
 
@@ -71,6 +72,7 @@ worker.commands.CommandContext = class extends CommandContext {
 
     return user.dg
   }
+
   async getZip () {
     return (await this.getDb())?.zip
   }
@@ -81,7 +83,7 @@ worker.commands
     command: 'help',
     aliases: ['support'],
     exec: (ctx) => {
-      ctx.embed
+      return ctx.embed
         .title('Help with Weather Bot')
         .field('How to use', `Simply do ${ctx.prefix} [location], to see weather at said location\nYou can also do ${ctx.prefix} f [location], to see the forecast.`)
         .field('More Commands', [
@@ -99,26 +101,26 @@ worker.commands
       if (ctx.args[0] === 'location') {
         if (!ctx.args[1]) return ctx.error('Missing location: Do ...set location [location]')
         const { name } = await getWeather(ctx.args.slice(1).join(' '), 'f')
-        db.collection('users').updateOne({ id: ctx.message.author.id }, {
+        await db.collection('users').updateOne({ id: ctx.message.author.id }, {
           $set: {
             zip: String(ctx.args[1])
           }
         }, { upsert: true })
 
-        ctx.embed
+        await ctx.embed
           .color(config.color)
           .description(`Set default location ${name}\n\nDo "${ctx.prefix}" to see this location.`)
           .send()
       } else if (ctx.args[0] === 'dg') {
         if (!ctx.args[1] || !Object.keys(degrees).includes(ctx.args[1])) return ctx.error(`Missing or invalid degree type, Do ...set dg [${Object.keys(degrees).join('/')}]`)
 
-        db.collection('users').updateOne({ id: ctx.message.author.id }, {
+        await db.collection('users').updateOne({ id: ctx.message.author.id }, {
           $set: {
             dg: ctx.args[1]
           }
         }, { upsert: true })
 
-        ctx.embed
+        await ctx.embed
           .color(config.color)
           .description(`Set default degree to ${ctx.args[1]}`)
           .send()
@@ -133,18 +135,19 @@ worker.commands
 
         if (db) embed.description(`Current settings, degree: ${db.dg}, location: ${db.zip}`)
 
-        embed.send()
+        await embed.send()
       }
     }
   })
   .add({
     command: 'f',
+    aliases: ['forecast'],
     exec: async (ctx) => {
       if (!ctx.args[0] && !await ctx.getZip()) return ctx.error('Missing location! Do @Weather f [location] OR run @Weather settings if you\'d like to set a default location')
 
       const response = await getWeather(ctx.args[0] ? ctx.args.join(' ') : await ctx.getZip(), await ctx.getDegree())
 
-      const embed = weatherEmbed(ctx.embed, response)
+      const embed = weatherEmbed(ctx.embed, response, true)
 
       const { degreeType } = response
 
@@ -156,7 +159,7 @@ worker.commands
         embed.field(`${day.day} | ${date}`, `High: ${day.high}${deg}${degreeType}\nLow: ${day.low}${deg}${degreeType}\nPrecipitation: ${day.precip ?? '0'}%`)
       })
 
-      embed.send()
+      await embed.send()
     }
   })
   .add({
@@ -165,7 +168,6 @@ worker.commands
       if (!ctx.ran && !await ctx.getZip()) return ctx.error('Missing location! Do @Weather [location] OR run @Weather settings if you\'d like to set a default location')
       const response = await getWeather(ctx.ran ? ctx.ran + ctx.args.join(' ') : await ctx.getZip(), await ctx.getDegree())
 
-      
       const { weather, degreeType } = response
 
       await weatherEmbed(ctx.embed, response)

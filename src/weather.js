@@ -32,6 +32,7 @@ const weather = require('weather-js')
 /**
  * Gets weather data for location
  * @param {string} location Location string
+ * @param {string} degree Degree type
  * @returns {Promise<WeatherData>}
  */
 module.exports = (location, degree) => {
@@ -52,7 +53,7 @@ module.exports = (location, degree) => {
         })
       }
 
-      const dat = {
+      resolve({
         name: data.location.name,
         lat: data.location.lat,
         long: data.location.long,
@@ -66,9 +67,7 @@ module.exports = (location, degree) => {
           forecast: data.forecast.find(x => x.date === data.current.date)
         },
         forecast: data.forecast
-      }
-
-      resolve(dat)
+      })
     })
   })
 }
