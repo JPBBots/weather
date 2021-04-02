@@ -1,6 +1,6 @@
 {
   "name": "weather",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Weather bot for Discord",
   "main": "index.js",
   "scripts": {
@@ -17,9 +17,6 @@
   },
   "homepage": "https://github.com/JPBBots/weather#readme",
   "dependencies": {
-    "@discord-rose/admin-middleware": "^1.1.0",
-    "@discord-rose/flags-middleware": "^1.0.2",
-    "@discord-rose/permissions-middleware": "^1.1.0",
     "discord-rose": "^1.2.1",
     "interface": "github:jpbbots/interface",
     "weather-js": "^2.0.0"
