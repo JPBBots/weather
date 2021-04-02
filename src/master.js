@@ -16,6 +16,8 @@ const master = new Master(path.resolve(__dirname, './worker.js'), {
   }
 })
 
-AutoPoster(config.dbl, master)
+AutoPoster(config.dbl, master).on('posted', () => {
+  console.log('Posted stats to Top.gg')
+})
 
 master.start()
