@@ -6,13 +6,11 @@ const path = require('path')
 
 const master = new Master(path.resolve(__dirname, './worker.js'), {
   token: config.token,
-  cache: {
-    channels: false
-  },
   shards: 5,
   cacheControl: {
     roles: ['permissions'],
-    guilds: ['owner_id']
+    guilds: ['owner_id'],
+    channels: ['permission_overwrites']
   }
 })
 

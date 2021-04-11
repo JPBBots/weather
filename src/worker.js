@@ -26,7 +26,7 @@ const deg = '°'
 worker.commands
   .options({
     default: {
-      myPerms: ['embed']
+      myPerms: ['embed', 'readHistory']
     }
   })
   .prefix(() => {
@@ -184,7 +184,8 @@ worker.commands
 
 worker.commands.error((ctx, error) => {
   if (!ctx.myPerms('sendMessages')) return
-  if (!ctx.myPerms('embed')) return ctx.send('Missing `Embed Link` permissions.')
+  if (!ctx.myPerms('embed')) return ctx.send('Missing `Embed Link` permission.')
+  if (!ctx.myPerms('readHistory')) return ctx.send('Missing `Read Message History` permission.')
 
   ctx.embed
     .color(0xFF0000)
