@@ -126,10 +126,11 @@ worker.commands
       }
       if (ctx.args[0] === 'location') {
         if (!ctx.args[1]) return ctx.error('Missing location: Do ...set location [location]')
-        const { name } = await getWeather(ctx.args.slice(1).join(' '), 'f')
+        const location = ctx.args.slice(1).join(' ')
+        const { name } = await getWeather(location, 'f')
         await db.collection('users').updateOne({ id: ctx.author.id }, {
           $set: {
-            zip: String(ctx.args[1])
+            zip: location
           }
         }, { upsert: true })
 
