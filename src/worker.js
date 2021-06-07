@@ -228,7 +228,7 @@ worker.commands
         .field('Temperature', `${weather.temperature}${deg}${degreeType}`, true)
         .field('Feels Like', `${weather.feelsLike}${deg}${degreeType}`, true)
         .field('Sky', weather.skyText, true)
-        .field('Humditiy', `${weather.humidity}%`, true)
+        .field('Humidity', `${weather.humidity}%`, true)
         .field('High / Low', `${weather.forecast.high}${deg}${degreeType} / ${weather.forecast.low}${deg}${degreeType}`, true)
         .field('Precipitation', `${weather.forecast.precip ?? '0'}%`, true)
         .send()
