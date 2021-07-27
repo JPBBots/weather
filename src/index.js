@@ -1,5 +1,5 @@
-const { Worker, Embed, CommandContext, SlashCommandContext } = require('discord-rose')
-const { Interface } = require('interface')
+const { SingleWorker, Embed, CommandContext, SlashCommandContext } = require('discord-rose')
+const { Interface } = require('@jpbbots/interface')
 const getWeather = require('./weather')
 
 const config = require('../config')
@@ -14,11 +14,22 @@ const degrees = {
   c: 'Celcius'
 }
 
-const worker = new Worker()
+const worker = new SingleWorker({
+  token: config.token,
+  shards: 5,
+  cacheControl: {
+    roles: ['permissions'],
+    guilds: ['owner_id'],
+    channels: ['permission_overwrites']
+  }
+})
+
+interface.setupSingleton(worker, 'weather')
+
 worker.db = db
 worker.interface = interface;
 
-interface.setupWorker(worker)
+// interface.setupWorker(worker)
 
 worker.setStatus('watching', 'the Clouds')
 const deg = '°'

@@ -2,7 +2,7 @@
   "name": "weather",
   "version": "2.0.0",
   "description": "Weather bot for Discord",
-  "main": "./src/master.js",
+  "main": "./src",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/JPBBots/weather#readme",
   "dependencies": {
+    "@jpbbots/interface": "^1.0.2",
     "discord-rose": "github:discord-rose/discord-rose#build",
     "interface": "github:jpbbots/interface",
     "topgg-autoposter": "^1.1.9",
