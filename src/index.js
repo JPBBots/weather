@@ -304,3 +304,8 @@ worker.commands.SlashCommandContext = class extends SlashCommandContext {
     return (await this.getDb())?.zip
   }
 }
+
+
+worker.on('DEBUG', (msg) => {
+  console.debug(`DEBUG: ${msg}`)
+})
