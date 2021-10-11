@@ -21,6 +21,5 @@
     "discord-rose": "^1.5.0",
     "topgg-autoposter": "^1.1.9",
     "weather-js": "^2.0.0"
-  },
-  "types": "./typings.ts"
+  }
 }
