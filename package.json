@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/JPBBots/weather#readme",
   "dependencies": {
-    "@jpbbots/interface": "^1.0.2",
+    "@jpbbots/interface": "^1.0.6",
     "discord-rose": "^1.5.0",
     "topgg-autoposter": "^1.1.9",
     "weather-js": "^2.0.0"

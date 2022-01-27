@@ -305,7 +305,3 @@ worker.commands.SlashCommandContext = class extends SlashCommandContext {
   }
 }
 
-
-worker.on('DEBUG', (msg) => {
-  console.debug(`DEBUG: ${msg}`)
-})
