@@ -1,11 +1,11 @@
+version: "3"
 services:
   prod:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: base
+    network_mode: host
+    build: .
     volumes:
       - ./src:/app/src
+      - ./dist:/app/dist
     env_file:
       - .env
     environment:

@@ -9,6 +9,7 @@ import { WeatherCommand } from '../commands/Weather'
 import { ForecastCommand } from '../commands/Forecast'
 import { HelpCommand } from '../commands/Help'
 import { SettingsCommand } from '../commands/Settings'
+import { Embed } from '@jadl/embed'
 
 export interface UserInfo {
   id: Snowflake
@@ -24,8 +25,7 @@ export class WeatherBot extends SingleWorker {
   int = new Interface()
   db = this.int.createDb(
     'weather',
-    process.env.DATABASE_PASSWORD!,
-    prod ? 'host.docker.internal' : 'localhost'
+    process.env.DATABASE_PASSWORD!
   )
 
   weather = new WeatherApi()
@@ -49,10 +49,27 @@ export class WeatherBot extends SingleWorker {
       cacheControl: {
         guilds: []
       },
-      intents: GatewayIntentBits.Guilds
+      intents: GatewayIntentBits.Guilds | GatewayIntentBits.GuildMessages
     })
 
-    // this.int.setupSingleton(this, 'weather')
+    this.setStatus('watching', 'The Weather')
+
+    this.int.setupSingleton(this, 'weather')
+
+    this.on('MESSAGE_CREATE', (msg) => {
+      if ([`<@${this.user.id}>`, `<@!${this.user.id}>`].some(x => msg.content.startsWith(x))) {
+        this.api.post(`/channels/${msg.channel_id}/messages`, { 
+          body: {
+            embeds: [
+              new Embed()
+                .title('We\'ve moved to slash commands!')
+                .description('To get your weather do /weather or /forecast')
+                .render()
+            ]
+          }
+        })
+      }
+    })
   }
 
   get userDb (): Collection<UserInfo> {
