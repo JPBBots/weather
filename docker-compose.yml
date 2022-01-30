@@ -1,0 +1,14 @@
+services:
+  prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./src:/app/src
+    env_file:
+      - .env
+    environment:
+      - PRODUCTION=true
+    restart: unless-stopped
+    command: npm start

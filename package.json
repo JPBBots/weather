@@ -2,9 +2,10 @@
   "name": "weather",
   "version": "2.0.0",
   "description": "Weather bot for Discord",
-  "main": "./src",
+  "main": "./dist/",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node ."
   },
   "repository": {
     "type": "git",
@@ -17,10 +18,17 @@
   },
   "homepage": "https://github.com/JPBBots/weather#readme",
   "dependencies": {
-    "@jpbbots/interface": "^1.0.6",
-    "discord-rose": "^1.5.0",
+    "@jadl/cmd": "^0.2.2",
+    "@jadl/embed": "^0.0.3",
+    "@jpbbots/interface": "^2.0.1",
+    "jadl": "^0.1.6",
     "topgg-autoposter": "^1.1.9",
+    "ts-node": "^10.4.0",
     "weather-js": "^2.0.0"
   },
-  "types": "./typings.ts"
+  "devDependencies": {
+    "discord-api-types": "^0.26.1",
+    "mongodb": "^3.7.0",
+    "typescript": "^4.5.5"
+  }
 }
