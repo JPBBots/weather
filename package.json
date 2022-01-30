@@ -21,7 +21,7 @@
   "dependencies": {
     "@jadl/cmd": "^0.2.2",
     "@jadl/embed": "^0.0.3",
-    "@jpbbots/interface": "^2.0.1",
+    "@jpbbots/interface": "^2.2.1",
     "jadl": "^0.1.6",
     "topgg-autoposter": "^1.1.9",
     "ts-node": "^10.4.0",

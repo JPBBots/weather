@@ -9,7 +9,6 @@ import { WeatherCommand } from '../commands/Weather'
 import { ForecastCommand } from '../commands/Forecast'
 import { HelpCommand } from '../commands/Help'
 import { SettingsCommand } from '../commands/Settings'
-import { Embed } from '@jadl/embed'
 
 export interface UserInfo {
   id: Snowflake
@@ -22,7 +21,7 @@ export const COLOR = 0x07a2e8
 const prod = process.env.PRODUCTION === 'true'
 
 export class WeatherBot extends SingleWorker {
-  int = new Interface()
+  int = new Interface(prod)
   db = this.int.createDb(
     'weather',
     process.env.DATABASE_PASSWORD!
@@ -56,20 +55,7 @@ export class WeatherBot extends SingleWorker {
 
     this.int.setupSingleton(this, 'weather')
 
-    this.on('MESSAGE_CREATE', (msg) => {
-      if ([`<@${this.user.id}>`, `<@!${this.user.id}>`].some(x => msg.content.startsWith(x))) {
-        this.api.post(`/channels/${msg.channel_id}/messages`, { 
-          body: {
-            embeds: [
-              new Embed()
-                .title('We\'ve moved to slash commands!')
-                .description('To get your weather do /weather or /forecast')
-                .render()
-            ]
-          }
-        })
-      }
-    })
+    this.int.commands.setupOldCommand([], ['', 'f', 'forecast'])
   }
 
   get userDb (): Collection<UserInfo> {
