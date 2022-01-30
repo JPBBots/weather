@@ -1,6 +1,6 @@
 import { GatewayIntentBits } from 'discord-api-types'
 import { SingleWorker, Snowflake } from 'jadl'
-import { DegreeType, WeatherApi } from './WeatherAPI'
+import { DegreeType, WeatherApi } from './WeatherApi'
 import { Interface } from '@jpbbots/interface'
 
 import type { Collection } from 'mongodb'

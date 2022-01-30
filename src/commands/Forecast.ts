@@ -1,6 +1,6 @@
 import { Command, Options, Run, CommandError } from '@jadl/cmd'
 import { Embed } from '@jadl/embed'
-import { DegreeType } from '../structures/WeatherAPI'
+import { DegreeType } from '../structures/WeatherApi'
 import { COLOR } from '../structures/WeatherBot'
 import { Degree } from './decorators/Degree'
 import { getWeather, GetWeather } from './decorators/GetWeather'

@@ -1,7 +1,7 @@
 import { APIUser } from 'discord-api-types'
 import { Command, Options, SubCommand, Worker, Author } from '@jadl/cmd'
 import { Embed } from '@jadl/embed'
-import { DegreeType } from '../structures/WeatherAPI'
+import { DegreeType } from '../structures/WeatherApi'
 import { COLOR, UserInfo, WeatherBot } from '../structures/WeatherBot'
 import { Db } from './decorators/Db'
 

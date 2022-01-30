@@ -1,5 +1,5 @@
 import { Decorators } from '@jadl/cmd'
-import { WeatherApi } from '../../structures/WeatherAPI'
+import { WeatherApi } from '../../structures/WeatherApi'
 import { WeatherBot } from '../../structures/WeatherBot'
 
 export type getWeather = WeatherApi['getWeather']

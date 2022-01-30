@@ -1,5 +1,5 @@
 import { Decorators } from '@jadl/cmd'
-import { DegreeType } from '../../structures/WeatherAPI'
+import { DegreeType } from '../../structures/WeatherApi'
 import { WeatherBot } from '../../structures/WeatherBot'
 
 export const Degree = Decorators.createParameterDecorator(() => {
