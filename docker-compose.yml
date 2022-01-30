@@ -1,14 +1,20 @@
-version: "3"
+version: "3.8"
 services:
   prod:
+    container_name: Weather
     network_mode: host
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+
     volumes:
       - ./src:/app/src
-      - ./dist:/app/dist
+      - ./node_modules:/app/node_modules
+
     env_file:
       - .env
     environment:
       - PRODUCTION=true
+
+    entrypoint: ["npm", "start"]
     restart: unless-stopped
-    command: npm start
