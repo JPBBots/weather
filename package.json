@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/JPBBots/weather#readme",
   "dependencies": {
-    "@jadl/cmd": "^0.2.2",
+    "@jadl/cmd": "^0.2.3",
     "@jadl/embed": "^0.0.3",
     "@jpbbots/interface": "^2.2.1",
     "jadl": "^0.1.6",

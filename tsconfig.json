@@ -9,7 +9,6 @@
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
     "strictNullChecks": true,
-    "sourceMap": true,
     "allowJs": true,
     "esModuleInterop": true
   }
