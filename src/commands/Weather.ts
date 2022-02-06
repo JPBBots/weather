@@ -29,7 +29,7 @@ export class WeatherCommand {
         }
       ]
     }) degree = defaultDegree,
-    @Options.String('location', 'Location to get whether in') location = defaultLocation
+    @Options.String('location', 'Location to get weather in') location = defaultLocation
   ) {
     if (!location) throw new CommandError(
       new Embed()
