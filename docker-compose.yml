@@ -2,19 +2,28 @@ version: "3.3"
 services:
   prod:
     container_name: Weather
-    network_mode: host
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - NPM_TOKEN=${GH_TOKEN}
 
     volumes:
       - ./src:/app/src
-      - ./node_modules:/app/node_modules
 
     env_file:
       - .env
+    networks:
+      - mongo
+      - influx
     environment:
       - PRODUCTION=true
 
     entrypoint: ["npm", "start"]
     restart: unless-stopped
+
+networks:
+  mongo:
+    name: mongodb
+  influx:
+    name: influxdb

@@ -5,8 +5,8 @@
   "main": "./dist/",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prestart": "npm i && tsc",
-    "start": "node --inspect=0.0.0.0:9229 ."
+    "prestart": "tsc",
+    "start": "node ."
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
   "dependencies": {
     "@jadl/cmd": "^0.2.3",
     "@jadl/embed": "^0.0.3",
-    "@jpbbots/interface": "^2.2.1",
+    "@jpbbots/interface": "^2.2.2",
     "jadl": "^0.1.6",
     "topgg-autoposter": "^1.1.9",
     "ts-node": "^10.4.0",

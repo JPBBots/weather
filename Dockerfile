@@ -2,9 +2,10 @@ FROM node:16
 
 WORKDIR /app
 
-COPY ./package.json /app/package.json
-COPY ./tsconfig.json /app/tsconfig.json
+ARG NPM_TOKEN
 
-RUN npm i -g typescript
+COPY package.json package.json
+COPY tsconfig.json tsconfig.json
+COPY .npmrc .npmrc
 
-ENTRYPOINT [ "node", "/app/dist" ]
+RUN npm i
