@@ -14,8 +14,7 @@ services:
     env_file:
       - .env
     networks:
-      - mongo
-      - influx
+      - small_bots
     environment:
       - PRODUCTION=true
 
@@ -23,7 +22,5 @@ services:
     restart: unless-stopped
 
 networks:
-  mongo:
-    name: mongodb
-  influx:
-    name: influxdb
+  small_bots:
+    name: small_bots_bridge
