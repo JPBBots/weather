@@ -10,7 +10,7 @@ import { ForecastCommand } from '../commands/Forecast'
 import { HelpCommand } from '../commands/Help'
 import { SettingsCommand } from '../commands/Settings'
 import { Embed } from '@jadl/builders'
-import { weatherMenu, WeatherMenu } from '../commands/menus/WeatherMenu'
+import { weatherMenu } from '../commands/menus/WeatherMenu'
 
 export interface UserInfo {
   id: Snowflake
@@ -27,7 +27,7 @@ const prod = process.env.PRODUCTION === 'true'
 
 export class WeatherBot extends SingleWorker {
   int = new Interface(prod)
-  db = this.int.createDb('weather', process.env.DATABASE_PASSWORD!, 'localhost')
+  db = this.int.createDb('weather', process.env.DATABASE_PASSWORD!)
 
   cmd = new CommandHandler(
     this,
