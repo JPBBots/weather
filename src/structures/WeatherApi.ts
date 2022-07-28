@@ -1,88 +1,108 @@
+import { Embed } from '@jadl/builders'
 import { CommandError } from '@jadl/cmd'
-import weather from 'weather-js'
+import { Cache } from '@jpbberry/cache'
+import { Snowflake } from 'jadl'
+import { request } from 'undici'
+import {
+  CurrentWeatherResult,
+  ForecastResult,
+  SearchResult
+} from '../WeatherAPITypings'
 
 export enum DegreeType {
-  Farenheit = 'f',
-  Celcius = 'c',
+  Fahrenheit = 'f',
+  Celsius = 'c',
   Kelvin = 'k'
 }
 
-interface DayData {
-  low: string
-  high: string
-  day: string
-  date: string
-  precip: string
-}
-
-interface CurrentWeather {
-  temperature: string
-  skyText: string
-  image: string
-  humidity: string
-  feelsLike: string
-  forecast: DayData
-}
-
-interface WeatherData {
-  /**
-   * Name of location
-   */
-  name: string
-  /**
-   * Latitude
-   */
-  lat: string
-  /**
-   * Longitude
-   */
-  long: string
-  /**
-   * Degree type
-   */
-  degreeType: 'C' | 'F' | 'K'
-  weather: CurrentWeather
-  forecast: DayData[]
+export enum MeasurementSystem {
+  Metric = 'm',
+  Imperial = 'i'
 }
 
 export class WeatherApi {
-  async getWeather (location: string, degree: DegreeType): Promise<WeatherData> {
-    return new Promise((resolve, reject) => {
-      weather.find({ 
-        search: location.replace(/ $/, ''),
-        degreeType: degree === DegreeType.Kelvin ? DegreeType.Celcius : degree
-      }, (err, data) => {
-        if (err) return reject(err)
-  
-        if (!data?.[0]) return reject(new CommandError('Invalid location'))
-        data = data[0]
-  
-        if (degree === DegreeType.Kelvin) {
-          data.location.degreetype = 'K'
-          data.current.temperature = `${Number(data.current.temperature) + 273.15}`
-          data.current.feelslike = `${Number(data.current.feelslike) + 273.15}`
-          data.forecast.forEach(obj => {
-            obj.low = `${Number(obj.low) + 273.15}`
-            obj.high = `${Number(obj.high) + 273.15}`
-          })
-        }
-  
-        resolve({
-          name: data.location.name,
-          lat: data.location.lat,
-          long: data.location.long,
-          degreeType: data.location.degreetype,
-          weather: {
-            temperature: data.current.temperature,
-            skyText: data.current.skytext,
-            image: data.current.imageUrl,
-            humidity: data.current.humidity,
-            feelsLike: data.current.feelslike,
-            forecast: data.forecast.find(x => x.date === data.current.date)
-          },
-          forecast: data.forecast
-        })
-      })
+  static METHOD = 'https:'
+  static WEATHER_URL = `${this.METHOD}//api.weatherapi.com/v1/`
+  static searchCache = new Cache<string, SearchResult[]>(900000)
+  static currentWeatherCache = new Cache<string, CurrentWeatherResult>(1.8e6)
+  static forecastCache = new Cache<string, ForecastResult>(1.8e6)
+
+  static async request(
+    type: 'current' | 'forecast' | 'search',
+    params: Record<string, string>
+  ) {
+    params.key = process.env.WEATHER_KEY!
+
+    const { body } = await request(this.WEATHER_URL + type + '.json', {
+      query: params
     })
+
+    const json = await body.json()
+
+    if (json.error) {
+      throw new CommandError(
+        new Embed()
+          .color('Red')
+          .title('Weather Error')
+          .description(json.error.message)
+      )
+    }
+
+    return json
+  }
+
+  static async getCurrentWeather(
+    q: string,
+    userId?: Snowflake
+  ): Promise<CurrentWeatherResult> {
+    const cached = this.currentWeatherCache.get(q)
+    if (cached) {
+      if (userId) cached.storedUsers.add(userId)
+      return cached
+    }
+
+    const res = await this.request('current', { q, aqi: 'no' })
+
+    res.storedUsers = new Set()
+    if (userId) res.storedUsers.add(userId)
+
+    this.currentWeatherCache.set(q, res)
+
+    return res
+  }
+
+  static async getForecast(
+    q: string,
+    userId?: Snowflake
+  ): Promise<ForecastResult> {
+    const cached = this.forecastCache.get(q)
+    if (cached) {
+      if (userId) cached.storedUsers.add(userId)
+      return cached
+    }
+
+    const res = await this.request('forecast', {
+      q,
+      days: '4',
+      alerts: 'yes',
+      aqi: 'yes'
+    })
+
+    res.storedUsers = new Set()
+    if (userId) res.storedUsers.add(userId)
+
+    this.forecastCache.set(q, res)
+
+    return res
+  }
+
+  static async search(q: string): Promise<SearchResult[]> {
+    const cached = this.searchCache.get(q)
+    if (cached) return cached
+
+    const res = await this.request('search', { q })
+    this.searchCache.set(q, res)
+
+    return res
   }
 }

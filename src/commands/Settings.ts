@@ -1,73 +1,205 @@
-import { APIUser } from 'discord-api-types'
-import { Command, Options, SubCommand, Worker, Author } from '@jadl/cmd'
-import { Embed } from '@jadl/embed'
-import { DegreeType } from '../structures/WeatherApi'
-import { COLOR, UserInfo, WeatherBot } from '../structures/WeatherBot'
-import { Db } from './decorators/Db'
+import {
+  APIUser,
+  ButtonStyle,
+  ComponentType,
+  MessageFlags,
+  Routes
+} from 'discord-api-types/v9'
+import { Command, Worker, Author, Run, ComponentRunner } from '@jadl/cmd'
+import { Embed, MessageBuilder } from '@jadl/builders'
+import {
+  DegreeType,
+  MeasurementSystem,
+  WeatherApi
+} from '../structures/WeatherApi'
+import { UserInfo, WeatherBot } from '../structures/WeatherBot'
+import {
+  APIInteractionResponse,
+  InteractionResponseType,
+  TextInputStyle
+} from 'discord-api-types/v10'
+
+const swap = <V extends Record<string, string>>(
+  json: V
+): { [key in keyof V as V[key]]: key } => {
+  var ret: any = {}
+  for (var key in json) {
+    ret[json[key]] = key
+  }
+  return ret
+}
+
+const FlippedDegreeType = swap(DegreeType)
+const FlippedMeasurementType = swap(MeasurementSystem)
 
 @Command('settings', 'Changes your user settings')
 export class SettingsCommand {
-  @SubCommand('location', 'Sets the default location')
-  async location(
-    @Options.String('location', 'Default location to set', { required: true }) location: string,
-    @Worker() worker: WeatherBot,
-    @Author() author: APIUser
-  ) {
-    const { name } = await worker.weather.getWeather(location, DegreeType.Farenheit)
-    await worker.userDb.updateOne({ id: author.id }, {
-      $set: {
-        zip: location
+  static changeDegrees = new ComponentRunner<
+    ComponentType.SelectMenu,
+    WeatherBot
+  >({
+    type: ComponentType.SelectMenu,
+    custom_id: 'settings_degrees',
+    options: [
+      {
+        label: 'Fahrenheit',
+        value: DegreeType.Fahrenheit
+      },
+      {
+        label: 'Celcius',
+        value: DegreeType.Celsius
+      },
+      {
+        label: 'Kelvin',
+        value: DegreeType.Kelvin
       }
-    }, { upsert: true })
+    ],
+    placeholder: 'Choose degree type'
+  }).setHandle(async (int, worker) => {
+    await worker.userDb.updateOne(
+      { id: int.member!.user.id },
+      {
+        $set: { id: int.member!.user.id, dg: int.data.values[0] as DegreeType }
+      },
+      { upsert: true }
+    )
+
+    const user = (await worker.userDb.findOne({ id: int.member!.user.id }))!
 
     return new Embed()
-      .color(COLOR)
-      .description(`Set default location ${name}\n\nDo /weather to see this location.`)
-  }
+      .title('Weather Bot Settings')
+      .description(SettingsCommand.createCurrentSettings(user))
+  })
 
-  @SubCommand('degree', 'Sets the default degree')
-  async degree(
-    @Options.String('degree', 'Degree for the specific request', {
-      choices: [
-        {
-          name: 'Farenheit',
-          value: DegreeType.Farenheit
-        },
-        {
-          name: 'Celcius',
-          value: DegreeType.Celcius
-        },
-        {
-          name: 'Kelvin',
-          value: DegreeType.Kelvin
+  static changeMeasurement = new ComponentRunner<
+    ComponentType.SelectMenu,
+    WeatherBot
+  >({
+    type: ComponentType.SelectMenu,
+    custom_id: 'settings_measurement',
+    options: [
+      {
+        label: 'Metric (MM/KPH)',
+        value: MeasurementSystem.Metric
+      },
+      {
+        label: 'Imperial (Inches/MPH)',
+        value: MeasurementSystem.Imperial
+      }
+    ],
+    placeholder: 'Choose measurement type'
+  }).setHandle(async (int, worker) => {
+    await worker.userDb.updateOne(
+      { id: int.member!.user.id },
+      {
+        $set: {
+          id: int.member!.user.id,
+          measurement: int.data.values[0] as MeasurementSystem
         }
-      ],
-      required: true
-    }) degree: DegreeType,
-    @Worker() worker: WeatherBot,
-    @Author() author: APIUser
-  ) {
-    await worker.userDb.updateOne({ id: author.id }, {
-      $set: {
-        dg: degree
-      }
-    }, { upsert: true })
+      },
+      { upsert: true }
+    )
+
+    const user = (await worker.userDb.findOne({ id: int.member!.user.id }))!
 
     return new Embed()
-      .color(COLOR)
-      .description(`Set default degree to ${degree}`)
+      .title('Weather Bot Settings')
+      .description(SettingsCommand.createCurrentSettings(user))
+  })
+
+  static changeLocation = new ComponentRunner<
+    ComponentType.SelectMenu,
+    WeatherBot
+  >({
+    type: ComponentType.SelectMenu,
+    custom_id: 'open_location_modal',
+    placeholder:
+      'Change default location, from your recently searched locations',
+    options: []
+  }).setHandle(async (int, worker) => {
+    await worker.userDb.updateOne(
+      { id: int.member!.user.id },
+      {
+        $set: {
+          id: int.member!.user.id,
+          zip: int.data.values[0]
+        }
+      },
+      { upsert: true }
+    )
+
+    const user = (await worker.userDb.findOne({ id: int.member!.user.id }))!
+
+    return new Embed()
+      .title('Weather Bot Settings')
+      .description(SettingsCommand.createCurrentSettings(user))
+  })
+
+  static createCurrentSettings(user: UserInfo) {
+    return (
+      'Current settings:\n\n' +
+      `**Location**: ${user.zip ?? 'None'}\n` +
+      `**Degree**: ${FlippedDegreeType[user.dg ?? DegreeType.Fahrenheit]}\n` +
+      `**Measurements**: ${
+        FlippedMeasurementType[user.measurement ?? MeasurementSystem.Metric]
+      }`
+    )
   }
 
-  @SubCommand('view', 'View the current settings')
-  view(
-    @Db() db: UserInfo
-  ) {
-    return new Embed()
-      .color(COLOR)
-      .title('Customization settings')
-      .description(`Current settings, degree: ${db.dg ?? DegreeType.Farenheit} ${db.zip ? `, location: ${db.zip}` : ''}`)
-      .field('Degrees', `To set your default degrees for any weather info.\n\nDo: /settings degree`, true)
-      .field('Default location', `To be able to just run /weather to see the information at that location.\n\nDo: /settings location`, true)
-      .footer('Need help? Do @Weather help')
+  @Run()
+  async settings(@Author() author: APIUser, @Worker() worker: WeatherBot) {
+    const user = (await worker.userDb.findOne({ id: author.id })) ?? {
+      dg: DegreeType.Fahrenheit,
+      id: author.id,
+      measurement: MeasurementSystem.Metric,
+      zip: null
+    }
+
+    const location = JSON.parse(
+      JSON.stringify(SettingsCommand.changeLocation.render())
+    ) as typeof SettingsCommand['changeLocation']['component']
+
+    const userStored = WeatherApi.forecastCache
+      .filter((x) => x.storedUsers.has(author.id))
+      .array()
+
+    location.options = userStored
+      .filter(
+        (a, ind) =>
+          userStored.indexOf(
+            userStored.find(
+              (b) =>
+                b.location.lat === a.location.lat &&
+                b.location.lon === a.location.lon
+            )!
+          ) === ind
+      )
+      .slice(0, 10)
+      .map((x) => ({
+        label: `${x.location.name}, ${x.location.region}`,
+        value: `${x.location.lat},${x.location.lon}`
+      }))
+
+    if (!location.options.length) {
+      location.options = [
+        {
+          label: 'Search for a place to add a default',
+          value: 'none',
+          default: true
+        }
+      ]
+      location.disabled = true
+    }
+
+    return new MessageBuilder()
+      .setMessage({ flags: MessageFlags.Ephemeral })
+      .addEmbed(
+        new Embed()
+          .title('Weather Bot Settings')
+          .description(SettingsCommand.createCurrentSettings(user))
+      )
+      .addComponentRow(location)
+      .addComponentRow(SettingsCommand.changeDegrees)
+      .addComponentRow(SettingsCommand.changeMeasurement)
   }
 }
