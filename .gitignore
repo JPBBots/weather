@@ -2,5 +2,6 @@ node_modules
 config.js
 dist/
 old/
+.vscode
 .env
 package-lock.json
