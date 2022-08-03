@@ -106,7 +106,7 @@ export class WeatherMenu extends ButtonMenu<WeatherMenuData, WeatherBot> {
       return get(measure) != undefined
     }
 
-    if (measurement === MeasurementSystem.Imperial) {
+    if (measurement === MeasurementSystem.Metric) {
       if (has('mm')) return get('mm') + 'mm'
       if (has('kph')) return get('kph') + ' KPH'
       if (has('km')) return get('km') + ' KM'
